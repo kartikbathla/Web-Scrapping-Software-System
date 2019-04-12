@@ -15,5 +15,6 @@ public class ItemTest {
 		Course i = new Course();
 		i.setTitle("ABCDE");
 		assertEquals(i.getTitle(), "ABCDE");
+		
 	}
 }
