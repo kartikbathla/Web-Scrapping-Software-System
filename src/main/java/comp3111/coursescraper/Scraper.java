@@ -103,7 +103,6 @@ public class Scraper {
 			s.setVenue(venue);
 			c.addSlot(s);	
 		}
-
 	}
 
 	public List<Course> scrape(String baseurl, String term, String sub) {
