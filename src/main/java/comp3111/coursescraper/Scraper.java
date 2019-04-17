@@ -103,7 +103,6 @@ public class Scraper {
 			s.setVenue(venue);
 			c.addSlot(s);	
 		}
-
 	}
 
 	public List<Course> scrape(String baseurl, String term, String sub) {
@@ -126,14 +125,21 @@ public class Scraper {
 				
 				List<?> popupdetailslist = (List<?>) htmlItem.getByXPath(".//div[@class='popupdetail']/table/tbody/tr");
 				HtmlElement exclusion = null;
+				HtmlElement commoncore = null;
 				for ( HtmlElement e : (List<HtmlElement>)popupdetailslist) {
 					HtmlElement t = (HtmlElement) e.getFirstByXPath(".//th");
 					HtmlElement d = (HtmlElement) e.getFirstByXPath(".//td");
-					if (t.asText().equals("EXCLUSION")) {
+					HtmlElement u = (HtmlElement) e.getFirstByXPath(".//th");
+					HtmlElement j = (HtmlElement) e.getFirstByXPath(".//td");
+ 					if (t.asText().equals("EXCLUSION")) {
 						exclusion = d;
+					}
+					if (u.asText().contains("4Y programs"))	{
+						commoncore = j;					
 					}
 				}
 				c.setExclusion((exclusion == null ? "null" : exclusion.asText()));
+				c.setCommonCore((commoncore == null ? false : true));
 				
 				List<?> sections = (List<?>) htmlItem.getByXPath(".//tr[contains(@class,'newsect')]");
 				for ( HtmlElement e: (List<HtmlElement>)sections) {
