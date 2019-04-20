@@ -87,7 +87,7 @@ public class Scraper {
 		client.getOptions().setJavaScriptEnabled(false);
 	}
 
-	private void addSlot(HtmlElement e, Course c, boolean secondRow) {
+	private void addSlot(HtmlElement e, Section c, boolean secondRow) {
 		String times[] =  e.getChildNodes().get(secondRow ? 0 : 3).asText().split(" ");
 		String venue = e.getChildNodes().get(secondRow ? 1 : 4).asText();
 		if (times[0].equals("TBA"))
@@ -95,6 +95,15 @@ public class Scraper {
 		for (int j = 0; j < times[0].length(); j+=2) {
 			String code = times[0].substring(j , j + 2);
 			if (Slot.DAYS_MAP.get(code) == null)
+				break;
+			String x1 = times[1].substring(0, 2); String x2 = times[1].substring(5, 7);
+			String x3 = times[3].substring(0, 2); String x4 = times[3].substring(5, 7);
+			String x5 = times[3].substring(3, 5);
+			int minutes = Integer.parseInt(x5);
+			int stime = Integer.parseInt(x1); int etime = Integer.parseInt(x3);
+			if (stime < 9 && x2 == "AM")
+				break;
+			if ((etime > 10 && minutes > 0) && x4 == "PM")
 				break;
 			Slot s = new Slot();
 			s.setDay(Slot.DAYS_MAP.get(code));
@@ -104,6 +113,9 @@ public class Scraper {
 			c.addSlot(s);	
 		}
 	}
+	
+	
+	
 
 	public List<Course> scrape(String baseurl, String term, String sub) {
 
@@ -117,8 +129,32 @@ public class Scraper {
 			Vector<Course> result = new Vector<Course>();
 
 			for (int i = 0; i < items.size(); i++) {
-				Course c = new Course();
+				
 				HtmlElement htmlItem = (HtmlElement) items.get(i);
+				
+				List<?> sections = (List<?>) htmlItem.getByXPath(".//tr[contains(@class,'newsect')]");
+				Vector<Section> listsections = new Vector<Section>();
+				for ( HtmlElement e: (List<HtmlElement>)sections) {
+					
+					String type[] = e.getFirstByXPath(".//td").toString().split(" ");
+					if(type[0].startsWith("L") || type[0].startsWith("T"))	{
+					
+					Section s = new Section(); s.setType(type[0]);
+					s.setsID(type[1]);
+					addSlot(e, s, false);
+					e = (HtmlElement)e.getNextSibling();
+					if (e != null && !e.getAttribute("class").contains("newsect"))
+						addSlot(e, s, true);
+					listsections.add(s);
+					}
+				}
+				
+				if (listsections.size()==0)
+					continue;
+				
+				
+				Course c = new Course();
+				
 				
 				HtmlElement title = (HtmlElement) htmlItem.getFirstByXPath(".//h2");
 				c.setTitle(title.asText());
@@ -129,24 +165,21 @@ public class Scraper {
 				for ( HtmlElement e : (List<HtmlElement>)popupdetailslist) {
 					HtmlElement t = (HtmlElement) e.getFirstByXPath(".//th");
 					HtmlElement d = (HtmlElement) e.getFirstByXPath(".//td");
-					HtmlElement u = (HtmlElement) e.getFirstByXPath(".//th");
-					HtmlElement j = (HtmlElement) e.getFirstByXPath(".//td");
+					
  					if (t.asText().equals("EXCLUSION")) {
 						exclusion = d;
 					}
-					if (u.asText().contains("4Y programs"))	{
-						commoncore = j;					
+					if (t.asText().equals("ATTRIBUTES") && d.asText().contains("4Y programs"))	{
+						commoncore = d;					
 					}
 				}
 				c.setExclusion((exclusion == null ? "null" : exclusion.asText()));
 				c.setCommonCore((commoncore == null ? false : true));
 				
-				List<?> sections = (List<?>) htmlItem.getByXPath(".//tr[contains(@class,'newsect')]");
-				for ( HtmlElement e: (List<HtmlElement>)sections) {
-					addSlot(e, c, false);
-					e = (HtmlElement)e.getNextSibling();
-					if (e != null && !e.getAttribute("class").contains("newsect"))
-						addSlot(e, c, true);
+				
+				for (int q = 0; q<listsections.size(); q++)
+				{
+					c.addSection(listsections.get(q));
 				}
 				
 				result.add(c);

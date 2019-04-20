@@ -3,7 +3,6 @@ package comp3111.coursescraper;
 
 
 public class Course {
-	private static final int DEFAULT_MAX_SLOTS = 20;
 	private static final int DEFAULT_MAX_SECTIONS = 20;
 	private String title ; 
 	private String description ;
@@ -12,13 +11,13 @@ public class Course {
 	private Section [] section;
 	private int numSections;
 
-	private Slot [] slot;
-	private int numSlots;
+	
 	
 	public Course() {
 		section = new Section[DEFAULT_MAX_SECTIONS];
 		for (int i = 0; i < DEFAULT_MAX_SECTIONS; i++) section[i] = null;
 		numSections = 0;
+		commonCore = false;
 	}
 	
 	public void addSection(Section s) {
@@ -27,12 +26,7 @@ public class Course {
 		section[numSections++] = s.clone();
 	}
 	
-	public void addSlot(Slot s) {
-		if (numSlots >= DEFAULT_MAX_SLOTS)
-			return;
-		slot[numSlots++] = s.clone();
-	}
-
+	
 	
 	public Section getSection(int i) {
 		if (i >= 0 && i < numSections)
