@@ -18,7 +18,7 @@ public class Slot {
 			DAYS_MAP.put(DAYS[i], i);
 	}
 
-	@Override
+	@Override	
 	public Slot clone() {
 		Slot s = new Slot();
 		s.day = this.day;

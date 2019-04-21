@@ -1253,6 +1253,7 @@ public class Controller {
 		List<Course> v = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(), textfieldSubject.getText());
 		for (Course c : v) {
 			String newline = c.getTitle() + "\n";
+
 			for (int i = 0; i < c.getNumSlots(); i++) {
 				Slot t = c.getSlot(i);
 				newline += "Slot " + i + ":" + t + "\n";
@@ -1277,6 +1278,7 @@ public class Controller {
 		ap.getChildren().addAll(randomLabel);
 
 	}
+
 
 }
 // practice committing

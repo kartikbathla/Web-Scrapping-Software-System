@@ -15,6 +15,15 @@ public class ItemTest {
 		Course i = new Course();
 		i.setTitle("ABCDE");
 		assertEquals(i.getTitle(), "ABCDE");
-		
+
 	}
+	
+	@Test
+	public void testSlotTime()	{
+		Slot s = new Slot();
+		s.setStart("02:00AM");
+		assertEquals(s.getStartHour(), 2);
+	}
+	
+	
 }

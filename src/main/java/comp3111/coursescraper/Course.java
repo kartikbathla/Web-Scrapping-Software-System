@@ -3,28 +3,34 @@ package comp3111.coursescraper;
 
 
 public class Course {
-	private static final int DEFAULT_MAX_SLOT = 20;
-	
+	private static final int DEFAULT_MAX_SECTIONS = 20;
 	private String title ; 
 	private String description ;
 	private String exclusion;
-	private Slot [] slots;
-	private int numSlots;
+	private boolean commonCore;
+	private Section [] section;
+	private int numSections;
+
+	
 	
 	public Course() {
-		slots = new Slot[DEFAULT_MAX_SLOT];
-		for (int i = 0; i < DEFAULT_MAX_SLOT; i++) slots[i] = null;
-		numSlots = 0;
+		section = new Section[DEFAULT_MAX_SECTIONS];
+		for (int i = 0; i < DEFAULT_MAX_SECTIONS; i++) section[i] = null;
+		numSections = 0;
+		commonCore = false;
 	}
 	
-	public void addSlot(Slot s) {
-		if (numSlots >= DEFAULT_MAX_SLOT)
+	public void addSection(Section s) {
+		if (numSections >= DEFAULT_MAX_SECTIONS)
 			return;
-		slots[numSlots++] = s.clone();
+		section[numSections++] = s.clone();
 	}
-	public Slot getSlot(int i) {
-		if (i >= 0 && i < numSlots)
-			return slots[i];
+	
+	
+	
+	public Section getSection(int i) {
+		if (i >= 0 && i < numSections)
+			return section[i];
 		return null;
 	}
 
@@ -69,19 +75,26 @@ public class Course {
 	public void setExclusion(String exclusion) {
 		this.exclusion = exclusion;
 	}
-
+	
+	public boolean getCommonCore()	{
+		return commonCore;
+	}
+	
+	public void setCommonCore(boolean val) {
+		this.commonCore = val;
+	}
 	/**
 	 * @return the numSlots
 	 */
-	public int getNumSlots() {
-		return numSlots;
+	public int getNumSections() {
+		return numSections;
 	}
 
 	/**
 	 * @param numSlots the numSlots to set
 	 */
-	public void setNumSlots(int numSlots) {
-		this.numSlots = numSlots;
+	public void setNumSections(int numSections) {
+		this.numSections = numSections;
 	}
 	
 
