@@ -15,8 +15,7 @@ public class ItemTest {
 		Course i = new Course();
 		i.setTitle("ABCDE");
 		assertEquals(i.getTitle(), "ABCDE");
-		Slot s = new Slot();
-		s.setStart("02:00AM");
+
 	}
 	
 	@Test

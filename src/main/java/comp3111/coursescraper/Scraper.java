@@ -1,3 +1,4 @@
+
 package comp3111.coursescraper;
 
 import java.net.URLEncoder;
@@ -193,3 +194,4 @@ public class Scraper {
 	}
 
 }
+
