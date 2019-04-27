@@ -8,14 +8,14 @@ public class Course {
 	private String description ;
 	private String exclusion;
 	private boolean commonCore;
-	private Section [] section;
+	private Section [] sections;
 	private int numSections;
 
 	
 	
 	public Course() {
-		section = new Section[DEFAULT_MAX_SECTIONS];
-		for (int i = 0; i < DEFAULT_MAX_SECTIONS; i++) section[i] = null;
+		sections = new Section[DEFAULT_MAX_SECTIONS];
+		for (int i = 0; i < DEFAULT_MAX_SECTIONS; i++) sections[i] = null;
 		numSections = 0;
 		commonCore = false;
 	}
@@ -23,14 +23,14 @@ public class Course {
 	public void addSection(Section s) {
 		if (numSections >= DEFAULT_MAX_SECTIONS)
 			return;
-		section[numSections++] = s.clone();
+		sections[numSections++] = s.clone();
 	}
 	
 	
 	
 	public Section getSection(int i) {
 		if (i >= 0 && i < numSections)
-			return section[i];
+			return sections[i];
 		return null;
 	}
 
@@ -97,5 +97,7 @@ public class Course {
 		this.numSections = numSections;
 	}
 	
-
+	public void increasesectionby1()	{
+		this.numSections++;
+	}
 }

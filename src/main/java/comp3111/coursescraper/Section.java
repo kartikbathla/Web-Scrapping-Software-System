@@ -10,6 +10,7 @@ import java.util.Map;
 public class Section{
 	private static final int MAX_NO_OF_SLOTS = 4;
 	private int noOfSlots;
+	private String instructor;
 	private Slot [] slots;
 	private String sID;
 	private String type;
@@ -22,6 +23,7 @@ public class Section{
 		enrollment = false;
 		sID = null;
 		type = null;
+		instructor = null;
 	}
 	
 	
@@ -34,6 +36,7 @@ public class Section{
 		s.sID = this.sID;
 		s.type = this.type;
 		s.enrollment = this.enrollment;
+		s.instructor = this.slots[0].getInstructor();
 		return s;
 	}
 	
@@ -81,7 +84,19 @@ public class Section{
 		this.sID = ID;
 	}
 	
+	public String getInstructor()	{
+		return instructor;
+	}
 	
+	public void throughslot(Slot s) {
+		this.instructor = s.getInstructor();
+	}
 	
+	public void setinstructor(String s)	{
+		this.instructor = s;
+	}
 	
+	public void increaseslotby1()	{
+		this.noOfSlots++;
+	}
 }
