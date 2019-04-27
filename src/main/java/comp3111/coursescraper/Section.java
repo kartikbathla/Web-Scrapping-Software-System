@@ -9,7 +9,7 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class Section{
 	private static final int MAX_NO_OF_SLOTS = 4;
-	private int noOfSlots;
+	private int numSlots;
 	private String instructor;
 	private Slot [] slots;
 	private String sID;
@@ -18,7 +18,7 @@ public class Section{
 	
 	public Section()	{
 		slots = new Slot[MAX_NO_OF_SLOTS];
-		noOfSlots = 0;
+		numSlots = 0;
 		for (int i = 0; i < MAX_NO_OF_SLOTS; i++) slots[i] = null;
 		enrollment = false;
 		sID = null;
@@ -30,9 +30,9 @@ public class Section{
 	@Override
 	public Section clone() {
 		Section s = new Section();
-		s.noOfSlots = this.noOfSlots;
-		for (int i = 0; i<noOfSlots; i++)
-			this.slots[i] = slots[i].clone();	
+		s.numSlots = this.numSlots;
+		for (int i = 0; i<numSlots; i++)
+			{ slots[i] = this.slots[i].clone();	}
 		s.sID = this.sID;
 		s.type = this.type;
 		s.enrollment = this.enrollment;
@@ -49,13 +49,13 @@ public class Section{
 	}
 	
 	public void addSlot(Slot s) {
-		if (noOfSlots >= MAX_NO_OF_SLOTS)
+		if (numSlots >= MAX_NO_OF_SLOTS)
 			return;
-		slots[noOfSlots++] = s.clone();
+		slots[numSlots++] = s;
 	}
 	
 	public Slot getSlot(int i)	{
-		if (i>=0 && i<noOfSlots)
+		if (i>=0 && i<numSlots)
 			return slots[i];
 		return null;
 	}
@@ -68,12 +68,12 @@ public class Section{
 		return enrollment;
 	}
 	
-	public int getNoOfSlots()	{
-		return noOfSlots;
+	public int getnumSlots()	{
+		return numSlots;
 	}
 	
-	public void setNoOfSlots(int slots)	{
-		this.noOfSlots = slots;
+	public void setnumSlots(int slots)	{
+		this.numSlots = slots;
 	}
 		
 	public String getsID()	{
@@ -97,6 +97,6 @@ public class Section{
 	}
 	
 	public void increaseslotby1()	{
-		this.noOfSlots++;
+		this.numSlots++;
 	}
 }
