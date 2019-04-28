@@ -82,12 +82,19 @@ public class Controller {
 
     @FXML
     void findInstructorSfq() {
-    	buttonInstructorSfq.setDisable(true);
+    	List<SFQ> v = scraper.scrapeinstructorSFQ(textfieldSfqUrl.getText());
+    	String disp = "X";
+    	for (SFQ c : v)
+    	{
+    		disp = c.getname() + " " + c.getsfq() + "\n";
+    	}
+    	textAreaConsole.setText(disp);
     }
 
     @FXML
     void findSfqEnrollCourse() {
-
+    	
+    	
     }
 
     @FXML

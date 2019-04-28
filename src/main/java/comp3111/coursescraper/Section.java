@@ -23,7 +23,7 @@ public class Section{
 		enrollment = false;
 		sID = null;
 		type = null;
-		instructor = null;
+		instructor = null; //add
 	}
 	
 	

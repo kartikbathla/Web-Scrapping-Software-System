@@ -10,12 +10,13 @@ public class Course {
 	private String exclusion;
 	private Section [] sections;
 	private int numSections;
-	private boolean commoncore;
+	private boolean commoncore; // add
+	private boolean enrollment;
 	
 	public Course() {
 		sections = new Section[DEFAULT_MAX_SECTIONS];
 		for (int i = 0; i < DEFAULT_MAX_SECTIONS; i++) sections[i] = null;
-		numSections = 0;
+		numSections = 0; enrollment = false;
 	}
 	
 	public void addSection(Section s) {
@@ -91,6 +92,18 @@ public class Course {
 	
 	public boolean getCommonCore()	{
 		return commoncore;
+	}
+	
+	public boolean getenrollment()		{
+		return enrollment;
+	}
+	
+	public void setenrollment()	{
+		for (int i = 0; i<numSections; i++)
+		{
+			if (sections[i].getEnrollment()==true)
+				this.enrollment = true;
+		}
 	}
 
 }

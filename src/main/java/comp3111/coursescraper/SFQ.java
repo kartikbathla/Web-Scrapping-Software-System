@@ -5,7 +5,7 @@ public class SFQ {
 	private String name;
 	
 	public SFQ()	{
-		sfq = 0;
+		sfq = 0; //  add
 		name = null;
 	}
 	

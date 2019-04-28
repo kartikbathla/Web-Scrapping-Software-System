@@ -118,6 +118,44 @@ public class Scraper {
 		return true;
 	}
 
+	public List<SFQ> scrapeinstructorSFQ(String url)	{
+		try	{
+			Vector<SFQ> result = new Vector<SFQ>();
+			HtmlPage page = client.getPage(url);
+			List<?> items = (List<?>) page.getByXPath(".//table");
+			for (int i = 2; i<items.size(); i++)	
+			{	
+				HtmlElement htmlItem = (HtmlElement) items.get(i);
+				List<?> sfqrows = (List<?>) htmlItem.getByXPath(".//table/tbody/tr");
+				for (int j = 0; j < sfqrows.size(); j++)
+				{
+					HtmlElement htmlrow = (HtmlElement) sfqrows.get(j);
+					List<?> d = (List<?>) htmlrow.getByXPath(".//td");
+					for (int k = 0; k < d.size(); k++)
+					{
+						HtmlElement row = (HtmlElement) items.get(k);
+						if (row.asText().contains(","))
+						{
+							SFQ obj = new SFQ();
+							obj.setname(row.asText());
+							HtmlElement number = (HtmlElement) items.get(k+1);
+							String num = number.asText(); String adj = num.substring(0,4);
+							int score = Integer.parseInt(adj);
+							obj.setsfq(score);
+							result.add(obj);
+						}
+					}					
+				}				
+			}
+			return result;
+			
+			
+		}catch (Exception e) {
+			System.out.println(e);
+		}		
+		return null;
+	}
+	
 	public List<Course> scrape(String baseurl, String term, String sub) throws Exception {
 
 		try {

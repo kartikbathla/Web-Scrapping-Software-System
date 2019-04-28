@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 
 public class Slot {
 	private int day;
-	private LocalTime start;
+	private LocalTime start; // add
 	private LocalTime end;
 	private String venue;
 	private String instructor;
