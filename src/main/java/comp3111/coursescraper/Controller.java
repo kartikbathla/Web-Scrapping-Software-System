@@ -141,6 +141,7 @@ public class Controller {
     	Random r = new Random();
     	double start = (r.nextInt(10) + 1) * 20 + 40;
 
+
     	randomLabel.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
     	randomLabel.setLayoutX(600.0);
     	randomLabel.setLayoutY(start);
@@ -157,5 +158,4 @@ public class Controller {
     	
     	
     }
-
 }
