@@ -6,39 +6,70 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
+
 @SuppressWarnings("unused")
 public class Section{
 	private static final int MAX_NO_OF_SLOTS = 4;
-	private int noOfSlots;
+	private int numSlots;
+	private String instructor;
 	private Slot [] slots;
 	private String sID;
 	private String type;
 	private boolean enrollment;
+	private String codeSec;
+	private String nameSec ;
+	
+	@FXML
+	public CheckBox enrolling;
 	
 	public Section()	{
 		slots = new Slot[MAX_NO_OF_SLOTS];
-		noOfSlots = 0;
+		numSlots = 0;
 		for (int i = 0; i < MAX_NO_OF_SLOTS; i++) slots[i] = null;
 		enrollment = false;
 		sID = null;
 		type = null;
+		instructor = null; //add
+		enrolling = new CheckBox();
 	}
 	
 	
 	@Override
 	public Section clone() {
 		Section s = new Section();
-		s.noOfSlots = this.noOfSlots;
-		for (int i = 0; i<noOfSlots; i++)
-			this.slots[i] = slots[i].clone();	
+		s.numSlots = this.numSlots;
+		for (int i = 0; i<numSlots; i++)
+			{ slots[i] = this.slots[i].clone();	}
 		s.sID = this.sID;
 		s.type = this.type;
 		s.enrollment = this.enrollment;
+		s.instructor = this.slots[0].getInstructor();
 		return s;
+	}
+	public void setEnrolling() {
+		enrolling.setSelected(true);
+		enrollment = true;
+	}
+	public CheckBox getEnrolling() {
+		return enrolling;
 	}
 	
 	public void setType(String s)	{
 		this.type = s;
+	}
+	public void setCodeSec(String code) {
+		this.codeSec = code;
+	}
+	public String getCodeSec() {
+		return codeSec;
+	}
+	public void setNameSec(String name) {
+		this.nameSec = name;
+	}
+	public String getNameSec() {
+		return nameSec;
 	}
 	
 	public String getType()	{
@@ -46,13 +77,13 @@ public class Section{
 	}
 	
 	public void addSlot(Slot s) {
-		if (noOfSlots >= MAX_NO_OF_SLOTS)
+		if (numSlots >= MAX_NO_OF_SLOTS)
 			return;
-		slots[noOfSlots++] = s.clone();
+		slots[numSlots++] = s;
 	}
 	
 	public Slot getSlot(int i)	{
-		if (i>=0 && i<noOfSlots)
+		if (i>=0 && i<numSlots)
 			return slots[i];
 		return null;
 	}
@@ -65,12 +96,12 @@ public class Section{
 		return enrollment;
 	}
 	
-	public int getNoOfSlots()	{
-		return noOfSlots;
+	public int getnumSlots()	{
+		return numSlots;
 	}
 	
-	public void setNoOfSlots(int slots)	{
-		this.noOfSlots = slots;
+	public void setnumSlots(int slots)	{
+		this.numSlots = slots;
 	}
 		
 	public String getsID()	{
@@ -81,7 +112,19 @@ public class Section{
 		this.sID = ID;
 	}
 	
+	public String getInstructor()	{
+		return instructor;
+	}
 	
+	public void throughslot(Slot s) {
+		this.instructor = s.getInstructor();
+	}
 	
+	public void setinstructor(String s)	{
+		this.instructor = s;
+	}
 	
+	public void increaseslotby1()	{
+		this.numSlots++;
+	}
 }

@@ -1,36 +1,38 @@
 package comp3111.coursescraper;
 
-
-
 public class Course {
-	private static final int DEFAULT_MAX_SECTIONS = 20;
-	private String title ; 
-	private String description ;
-	private String exclusion;
-	private boolean commonCore;
-	private Section [] section;
-	private int numSections;
+	private static final int DEFAULT_MAX_SECTIONS = 100;
 
-	
-	
+	private String title;
+	private String description;
+	private String exclusion;
+	private Section[] sections;
+	private int numSections;
+	private boolean commoncore; // add
+	private boolean enrollment;
+	public String code;
+	public String name;
+
 	public Course() {
-		section = new Section[DEFAULT_MAX_SECTIONS];
-		for (int i = 0; i < DEFAULT_MAX_SECTIONS; i++) section[i] = null;
+		sections = new Section[DEFAULT_MAX_SECTIONS];
+		for (int i = 0; i < DEFAULT_MAX_SECTIONS; i++)
+			sections[i] = null;
 		numSections = 0;
-		commonCore = false;
+		enrollment = false;
+		exclusion = null;
+		code = null;
+		name = null;
 	}
-	
+
 	public void addSection(Section s) {
 		if (numSections >= DEFAULT_MAX_SECTIONS)
 			return;
-		section[numSections++] = s.clone();
+		sections[numSections++] = s;
 	}
-	
-	
-	
+
 	public Section getSection(int i) {
 		if (i >= 0 && i < numSections)
-			return section[i];
+			return sections[i];
 		return null;
 	}
 
@@ -42,10 +44,16 @@ public class Course {
 	}
 
 	/**
-	 * @param title the title to set
+	 * @param title
+	 *            the title to set
 	 */
 	public void setTitle(String title) {
 		this.title = title;
+
+		this.code = title.substring(0, 10);
+		
+
+		this.name = title.substring(title.indexOf("-")+1, title.length());
 	}
 
 	/**
@@ -55,8 +63,17 @@ public class Course {
 		return description;
 	}
 
+	public String getCode() {
+		return code;
+	}
+
+	public String getName() {
+		return name;
+	}
+
 	/**
-	 * @param description the description to set
+	 * @param description
+	 *            the description to set
 	 */
 	public void setDescription(String description) {
 		this.description = description;
@@ -70,19 +87,13 @@ public class Course {
 	}
 
 	/**
-	 * @param exclusion the exclusion to set
+	 * @param exclusion
+	 *            the exclusion to set
 	 */
 	public void setExclusion(String exclusion) {
 		this.exclusion = exclusion;
 	}
-	
-	public boolean getCommonCore()	{
-		return commonCore;
-	}
-	
-	public void setCommonCore(boolean val) {
-		this.commonCore = val;
-	}
+
 	/**
 	 * @return the numSlots
 	 */
@@ -91,11 +102,30 @@ public class Course {
 	}
 
 	/**
-	 * @param numSlots the numSlots to set
+	 * @param numSlots
+	 *            the numSlots to set
 	 */
-	public void setNumSections(int numSections) {
+	public void setNumSlots(int numSections) {
 		this.numSections = numSections;
 	}
-	
+
+	public void setCommonCore(boolean c) {
+		this.commoncore = c;
+	}
+
+	public boolean getCommonCore() {
+		return commoncore;
+	}
+
+	public boolean getenrollment() {
+		return enrollment;
+	}
+
+	public void setenrollment() {
+		for (int i = 0; i < numSections; i++) {
+			if (sections[i].getEnrollment() == true)
+				this.enrollment = true;
+		}
+	}
 
 }

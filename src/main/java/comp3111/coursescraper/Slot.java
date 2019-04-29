@@ -8,27 +8,31 @@ import java.time.format.DateTimeFormatter;
 
 public class Slot {
 	private int day;
-	private LocalTime start;
+	private LocalTime start; // add
 	private LocalTime end;
 	private String venue;
+	private String instructor;
 	public static final String DAYS[] = {"Mo", "Tu", "We", "Th", "Fr", "Sa"};
 	public static final Map<String, Integer> DAYS_MAP = new HashMap<String, Integer>();
 	static {
 		for (int i = 0; i < DAYS.length; i++)
 			DAYS_MAP.put(DAYS[i], i);
 	}
-
-	@Override	
+	
+	
+	
+	@Override
 	public Slot clone() {
 		Slot s = new Slot();
 		s.day = this.day;
 		s.start = this.start;
 		s.end = this.end;
 		s.venue = this.venue;
+		s.instructor = this.instructor;
 		return s;
 	}
 	public String toString() {
-		return DAYS[day] + start.toString() + "-" + end.toString() + ":" + venue;
+		return DAYS[day] + " " + start.toString() + " - " + end.toString() + ":" + venue + " : " + instructor;
 	}
 	public int getStartHour() {
 		return start.getHour();
@@ -75,6 +79,7 @@ public class Slot {
 	/**
 	 * @param venue the venue to set
 	 */
+
 	public void setVenue(String venue) {
 		this.venue = venue;
 	}
@@ -90,6 +95,15 @@ public class Slot {
 	 */
 	public void setDay(int day) {
 		this.day = day;
+	}
+	
+	public void setInstructor(String s)	{
+		this.instructor = s;
+		
+	}
+	
+	public String getInstructor()	{
+		return instructor;
 	}
 
 }
