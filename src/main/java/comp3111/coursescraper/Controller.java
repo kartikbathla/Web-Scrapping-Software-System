@@ -148,18 +148,19 @@ public class Controller {
 		textAreaConsole.setText(textAreaConsole.getText() + "\n" + textfieldSfqUrl.getText());
 
 	}
+	static final List<Section> sectionslistn = new ArrayList<Section>();
 
 	@FXML
 	void display(List<Course> nvv) {
 		textAreaConsole.setText("");
 		List<Section> sectionslist = new ArrayList<Section>();
-
+		sectionslist.addAll(sectionslistn);
 		for (Course c : nvv) {
 
 			String newline = c.getTitle() + "\n";
 			for (int i = 0; i < c.getNumSections(); i++) {
 				Section t = c.getSection(i);
-
+				
 				sectionslist.add(t);
 				for (int j = 0; j < t.getnumSlots(); j++) {
 					Slot x = t.getSlot(j);
@@ -171,7 +172,16 @@ public class Controller {
 				}
 			}
 			textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+			
+			
+			}
+		textAreaConsole.setText(textAreaConsole.getText() + "Enrolled Sections are : ");
+		for (int i = 0; i < sectionslistn.size(); i++) {
+			String newlinee = sectionslistn.get(i).getCodeSec() + sectionslistn.get(i).getNameSec()
+					+ sectionslistn.get(i).getType();
 
+			textAreaConsole.setText(textAreaConsole.getText() + "\n" + newlinee);
+		}	
 			ObservableList data = FXCollections.observableList(sectionslist);
 			tableView.setItems(data);
 			courseCode.setCellValueFactory(new PropertyValueFactory<>("codeSec"));
@@ -182,8 +192,8 @@ public class Controller {
 			tableView.setItems(data);
 			tableView.getColumns().setAll(courseCode, section, courseName, instructorCol, enroll);
 
-		}
-		List<Section> sectionslistn = new ArrayList<Section>();
+		
+		//List<Section> sectionslistn = new ArrayList<Section>();
 		for (Section y : sectionslist) {
 			y.enrolling.selectedProperty().addListener(new ChangeListener<Boolean>() {
 
@@ -214,7 +224,14 @@ public class Controller {
 
 	void refresh(List<Course> nvv, List<Section>sectionlist) {
 		try {
-			
+			if (nvv.isEmpty()) {
+				for (int i = 0; i < sectionlist.size(); i++) {
+					String newline = sectionlist.get(i).getCodeSec() + sectionlist.get(i).getNameSec()
+							+ sectionlist.get(i).getType();
+
+					textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+				}
+			}
 			for (Course u : nvv) {
 				String newlinee = u.getTitle() + "\n";
 				for (int i = 0; i < u.getNumSections(); i++) {
@@ -540,6 +557,7 @@ public class Controller {
 					}
 					if ((exchange == 0) && (cchange == 0) && (daychange == 0) && (labchange == 0) && time == 0) {
 						nvv.removeAll(nvv);
+						
 					}
 
 				}
