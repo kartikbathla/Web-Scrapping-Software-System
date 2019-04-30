@@ -40,6 +40,9 @@ public class Section{
 		return s;
 	}
 	
+	/**
+	 * @param s ; sets the type of section(L1; T1; LA2)
+	 */
 	public void setType(String s)	{
 		this.type = s;
 	}

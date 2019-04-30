@@ -113,48 +113,113 @@ public class Scraper {
 			s.setStart(times[1]);
 			s.setEnd(times[3]);
 			s.setVenue(venue);
-			s.setInstructor(instructor);
-			c.addSlot(s);	
+			s.setInstructor(instructor); c.setinstructor(instructor);
+			c.addSlot(s); 
 		}
 		return true;
 	}
 
-	public List<SFQ> scrapeinstructorSFQ(String url)	{
+	
+	public Vector<SFQ> scrapecourseSFQ(String url)	{
 		try	{
-			Vector<SFQ> result = new Vector<SFQ>();
 			HtmlPage page = client.getPage(url);
+			Vector<SFQ> result = new Vector<SFQ>();
+			
 			List<?> items = (List<?>) page.getByXPath(".//table");
-			for (int i = 2; i<items.size(); i++)	
-			{	
-				HtmlElement htmlItem = (HtmlElement) items.get(i);
-				List<?> sfqrows = (List<?>) htmlItem.getByXPath(".//table/tbody/tr");
-				for (int j = 0; j < sfqrows.size(); j++)
+			
+			return result;
+		}catch (Exception e) 	{
+			System.out.println(e);
+			return null;
+		}		
+	}
+	
+	
+	public Vector<SFQ> scrapeinstructorSFQ(String url)	{
+		try	{
+			HtmlPage page = client.getPage(url);
+			Vector<SFQ> result = new Vector<SFQ>();
+		
+			List<?> items = (List<?>) page.getByXPath(".//table"); 
+			for (int i = 2; i < items.size(); i++)
+			{
+				HtmlElement table = (HtmlElement) items.get(i);
+				List<?> rowitems = (List<?>) table.getByXPath(".//tr");
+				for (int j = 1; j < rowitems.size(); j++)
 				{
-					HtmlElement htmlrow = (HtmlElement) sfqrows.get(j);
-					List<?> d = (List<?>) htmlrow.getByXPath(".//td");
-					for (int k = 0; k < d.size(); k++)
+					HtmlElement row = (HtmlElement) rowitems.get(j);
+					List<?> nodeitems = (List<?>) row.getByXPath(".//td");
+					for (int k = 0; k < nodeitems.size(); k++)
 					{
-						HtmlElement row = (HtmlElement) items.get(k);
-						if (row.asText().contains(","))
+						HtmlElement node = (HtmlElement) nodeitems.get(k);
+						String innode = node.asText();
+						String check = ",";
+						if(innode.contains(check))
 						{
-							SFQ obj = new SFQ();
-							obj.setname(row.asText());
-							HtmlElement number = (HtmlElement) items.get(k+1);
-							String num = number.asText(); String adj = num.substring(0,4);
-							int score = Integer.parseInt(adj);
-							obj.setsfq(score);
-							result.add(obj);
+							HtmlElement number = (HtmlElement) nodeitems.get(k+2); double score = 0;
+							String num = number.asText(); String subnum = num.substring(0,4); String boogey = "-";
+							if (subnum.contains(boogey))
+								continue;
+							else
+								{score = Double.parseDouble(subnum);			}				
+							SFQ f = new SFQ();
+							f.setname(innode);
+							f.setsfq(score);
+							result.add(f);
 						}
-					}					
-				}				
+					}
+				}
 			}
 			return result;
 			
-			
-		}catch (Exception e) {
+		}catch (Exception e) {		System.out.println(e);		return null;		}			
+	}
+	
+	public int sections(String baseurl, String term, String sub) {
+		try {
+			HtmlPage page = client.getPage(baseurl + "/" + term + "/subject/" + sub);
+			int totalsections = 0;
+			List<?> items = (List<?>) page.getByXPath("//div[@class='course']");
+			for (int i = 0; i < items.size(); i++) {
+				HtmlElement htmlItem = (HtmlElement) items.get(i);
+				List<?> sections = (List<?>) htmlItem.getByXPath(".//tr[contains(@class,'newsect')]");
+				for ( HtmlElement e: (List<HtmlElement>)sections) {
+					HtmlElement etype = e.getFirstByXPath(".//td");
+					String type[] = etype.asText().split(" ");
+					if(type[0].startsWith("L") || type[0].startsWith("T"))	{
+						totalsections++;
+					}
+				}	
+			}			
+			return totalsections;
+		} catch (Exception e) {
 			System.out.println(e);
-		}		
-		return null;
+			return 0;
+		}
+	}
+	
+	public int course(String baseurl, String term, String sub) {
+		try {
+			HtmlPage page = client.getPage(baseurl + "/" + term + "/subject/" + sub);
+			int totalcourses = 0;
+			List<?> items = (List<?>) page.getByXPath("//div[@class='course']");
+			for (int i = 0; i < items.size(); i++) {
+				HtmlElement htmlItem = (HtmlElement) items.get(i);
+				List<?> sections = (List<?>) htmlItem.getByXPath(".//tr[contains(@class,'newsect')]");
+				for (HtmlElement e: (List<HtmlElement>)sections)
+				{
+					HtmlElement etype = e.getFirstByXPath(".//td");
+					String type[] = etype.asText().split(" ");
+					if(type[0].startsWith("L") || type[0].startsWith("T"))	{
+						totalcourses++; break;
+					}
+				}			
+			}
+			return totalcourses;
+		} catch (Exception e) {
+			System.out.println(e);
+			return 0;
+		}
 	}
 	
 	public List<Course> scrape(String baseurl, String term, String sub) throws Exception {
@@ -167,7 +232,6 @@ public class Scraper {
 			List<?> items = (List<?>) page.getByXPath("//div[@class='course']");
 			
 			Vector<Course> result = new Vector<Course>();
-
 			for (int i = 0; i < items.size(); i++) {
 				Course c = new Course();
 				HtmlElement htmlItem = (HtmlElement) items.get(i);

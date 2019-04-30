@@ -2,6 +2,9 @@ package comp3111.coursescraper;
 
 
 import java.awt.event.ActionEvent;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -18,12 +21,19 @@ import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
 
 import java.util.Random;
+import java.util.Set;
+import java.util.Vector;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 /**
  * @author Administrator
  *
  */
 public class Controller {
+	
+	
 
     @FXML
     private Tab tabMain;
@@ -69,32 +79,25 @@ public class Controller {
 
     @FXML
     private Button buttonInstructorSfq;
-
+  
     @FXML
     private TextArea textAreaConsole;
     
     private Scraper scraper = new Scraper();
+   
     
     @FXML
     void allSubjectSearch() {
+    	buttonSfqEnrollCourse.setDisable(false);
+
     	
     }
 
-    @FXML
-    void findInstructorSfq() {
-    	List<SFQ> v = scraper.scrapeinstructorSFQ(textfieldSfqUrl.getText());
-    	String disp = "X";
-    	for (SFQ c : v)
-    	{
-    		disp = c.getname() + " " + c.getsfq() + "\n";
-    	}
-    	textAreaConsole.setText(disp);
-    }
+    
 
     @FXML
     void findSfqEnrollCourse() {
-    	
-    	
+    	   	
     }
 
     @FXML
@@ -116,8 +119,42 @@ public class Controller {
     @FXML
     void saturday()  {}
     
+    
+    
+    @FXML
+    void findInstructorSfq() {
+    	Vector<SFQ> v = scraper.scrapeinstructorSFQ(textfieldSfqUrl.getText());
+    	String disp = "";
+//    	for (int c = 0; c<v.size(); c++)
+//    	{
+//    		SFQ basis = v.get(c); String name = basis.getname();
+//    		for (int d = c+1; d<(v.size()-c); d++)
+//    		{
+//    			SFQ compare = v.get(d); String cname = compare.getname();
+//    			if (name == cname)
+//    			{
+//    				 
+//    				
+//    			}
+//    		}
+//    	}
+    	for (int i = 0; i < v.size(); i++)
+    	{
+    		SFQ c = v.get(i);
+    		disp += c.getname() + " " + c.getsfq() + "\n";
+    	}
+    	textAreaConsole.setText(disp);
+    }
+    
+    
+    public void initialize()
+    {
+    	buttonSfqEnrollCourse.setDisable(true);
+    }
+    
     @FXML
     void search() {
+    	buttonSfqEnrollCourse.setDisable(false);
     	try {
     	textAreaConsole.setText(" ");
     	List<Course> v = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());
@@ -134,6 +171,67 @@ public class Controller {
     		}
     		textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
     	}
+    	
+    	int totalsections = scraper.sections(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());
+//    	for (Course c : v)
+//    	{
+//    		int x = c.getNumSections();
+//    		totalsections += x;
+//    	}
+    	textAreaConsole.setText(textAreaConsole.getText() + "\n" + "TOTAL NUMBER OF DIFFERENT SECTIONS: " + totalsections );
+    	
+    	int totalvalidcourses = scraper.course(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());;
+//    	for (Course c : v)	{
+//    		if (c.getNumSections()!=0)
+//    			totalvalidcourses++;
+//    	}
+    	textAreaConsole.setText(textAreaConsole.getText() + "\n" + "TOTAL NUMBER OF COURSES: " + totalvalidcourses);
+    	
+    	Vector<String> instructors = new Vector<String>(); Vector<String> reject = new Vector<String>();
+    	String timeb = "03:10PM";
+		LocalTime boogey = LocalTime.parse(timeb, DateTimeFormatter.ofPattern("hh:mma", Locale.US));
+    	for (Course c : v)
+    	{
+    		for (int i = 0; i<c.getNumSections(); i++)
+    		{
+    			Section x = c.getSection(i);
+    			for (int j = 0; j<x.getnumSlots(); j++)
+    			{
+    				Slot y = x.getSlot(j);
+    				if (y.getStart().isBefore(boogey) && y.getEnd().isAfter(boogey) && y.getDay() == 1)
+    				{
+    					String boo = y.getInstructor();
+    					reject.add(boo);
+    				}
+    			}
+    			for (int j = 0; j<x.getnumSlots(); j++)
+    			{	
+    				Slot y = x.getSlot(j);
+    				String name = y.getInstructor(); 
+    				if (!instructors.contains(name) && !name.equals("TBA"))
+    				{
+    					instructors.add(name);
+    				}	
+    			}	
+    		}
+    	}
+    	Vector<String> finallist = new Vector<String>();
+    	for (int i = 0; i<instructors.size(); i++)
+    	{
+    		String temp = instructors.get(i);
+    		if (reject.contains(temp))
+    			continue;
+    		finallist.add(temp);
+    	}
+    	Collections.sort(finallist); 
+    	String line = "";
+    	for (int i = 0; i<finallist.size(); i++)
+    	{
+    		line += finallist.get(i) + " "+ i + " " + "\n";
+    	}
+    	textAreaConsole.setText(textAreaConsole.getText() + "\n" + "INSTRUCTORS WHO DO NOT HAVE A TEACHING ASSIGNMENT AT 3:10PM ON TUESDAY " + "\n" + line);
+
+    	
     	
     	//Add a random block on Saturday
     	AnchorPane ap = (AnchorPane)tabTimetable.getContent();

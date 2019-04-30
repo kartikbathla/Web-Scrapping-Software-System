@@ -1,7 +1,7 @@
 package comp3111.coursescraper;
 
 public class SFQ {
-	private int sfq;
+	private double sfq;
 	private String name;
 	
 	public SFQ()	{
@@ -9,11 +9,16 @@ public class SFQ {
 		name = null;
 	}
 	
-	public void setsfq(int i)	{
+	public SFQ(SFQ s) {
+		this.sfq = s.sfq;
+		this.name = s.name;
+	}
+	
+	public void setsfq(double i)	{
 		this.sfq = i;
 	}
 	
-	public int getsfq()	{
+	public double getsfq()	{
 		return sfq;
 	}
 	
