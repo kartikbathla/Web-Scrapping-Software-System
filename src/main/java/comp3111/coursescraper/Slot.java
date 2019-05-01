@@ -2,16 +2,19 @@ package comp3111.coursescraper;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 import java.time.LocalTime;
 import java.util.Locale;
 import java.time.format.DateTimeFormatter;
-
+/**
+ *  Slot is the basic unit of time
+ */
 public class Slot {
 	private int day;
 	private LocalTime start; // add
 	private LocalTime end;
 	private String venue;
-	private String instructor;
+	private List<String> instructor;
 	public static final String DAYS[] = {"Mo", "Tu", "We", "Th", "Fr", "Sa"};
 	public static final Map<String, Integer> DAYS_MAP = new HashMap<String, Integer>();
 	static {
@@ -20,6 +23,10 @@ public class Slot {
 	}
 	
 	
+	/**
+	 *  Used to copy while being added to section
+	 */
+
 	@Override
 	public Slot clone() {
 		Slot s = new Slot();
@@ -30,18 +37,33 @@ public class Slot {
 		s.instructor = this.instructor;
 		return s;
 	}
+	/**
+	 * @return a String of the slot
+	 */
 	public String toString() {
 		return DAYS[day] + " " + start.toString() + " - " + end.toString() + ":" + venue + " : " + instructor;
 	}
+	/**
+	 * @return the start hour
+	 */
 	public int getStartHour() {
 		return start.getHour();
 	}
+	/**
+	 * @return the start minute
+	 */
 	public int getStartMinute() {
 		return start.getMinute();
 	}
+	/**
+	 * @return the end hour
+	 */
 	public int getEndHour() {
 		return end.getHour();
 	}
+	/**
+	 * @return the end minute
+	 */
 	public int getEndMinute() {
 		return end.getMinute();
 	}
@@ -78,6 +100,7 @@ public class Slot {
 	/**
 	 * @param venue the venue to set
 	 */
+
 	public void setVenue(String venue) {
 		this.venue = venue;
 	}
@@ -94,12 +117,16 @@ public class Slot {
 	public void setDay(int day) {
 		this.day = day;
 	}
-	
-	public void setInstructor(String s)	{
+	/**
+	 * @param the list of instructors
+	 */
+	public void setInstructor(List<String> s)	{
 		this.instructor = s;
 	}
-	
-	public String getInstructor()	{
+	/**
+	 * @return the list of instructors
+	 */
+	public List<String> getInstructor()	{
 		return instructor;
 	}
 

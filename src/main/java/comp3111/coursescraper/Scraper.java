@@ -1,7 +1,10 @@
 
 package comp3111.coursescraper;
 
+
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -80,18 +83,28 @@ public class Scraper {
 	private WebClient client;
 
 	/**
-	 * Default Constructor 
+	 * Default Constructor
 	 */
 	public Scraper() {
 		client = new WebClient();
 		client.getOptions().setCssEnabled(false);
 		client.getOptions().setJavaScriptEnabled(false);
 	}
-
+	/**
+	 * @return boolean value whether it was successful
+	 * @param e HtmlElement to be decoded
+	 * @param c Section to which the slot will be added
+	 * @param secondRow whether it is a second row or not
+	 */
 	private boolean addSlot(HtmlElement e, Section c, boolean secondRow) {
 		String times[] =  e.getChildNodes().get(secondRow ? 0 : 3).asText().split(" ");
 		String venue = e.getChildNodes().get(secondRow ? 1 : 4).asText();
-		String instructor = e.getChildNodes().get(secondRow? 2 : 5).asText();
+		String inst[] = e.getChildNodes().get(secondRow? 2 : 5).asText().split(System.getProperty("line.separator"));
+		List<String> instructor = new ArrayList<String>();
+		for (String s:inst)
+		{
+			instructor.add(s);
+		}
 		if (times[0].equals("TBA"))
 			return false;
 		for (int j = 0; j < times[0].length(); j+=2) {
@@ -114,32 +127,97 @@ public class Scraper {
 			s.setEnd(times[3]);
 			s.setVenue(venue);
 			s.setInstructor(instructor); c.setinstructor(instructor);
-			c.addSlot(s); 
+			c.addSlot(s);	
 		}
 		return true;
 	}
-
-	
-	public Vector<SFQ> scrapecourseSFQ(String url)	{
+	/**
+	 * @return a vector of SFQ objects
+	 * @param the URL of the SFQ website
+	 */
+	public Vector<SFQ> scrapecourseSFQ(String url)
+	{
 		try	{
 			HtmlPage page = client.getPage(url);
 			Vector<SFQ> result = new Vector<SFQ>();
+			Controller x = new Controller(); List<Section> booty = x.sectionslistn; Vector<String> myneeds = new Vector<String>(); char compare = ' '; String toadd = "";
+			for (int i = 0; i< booty.size(); i++)
+			{
+				String sumbitch = booty.get(i).getCodeSec(); 
+				if (sumbitch.charAt(9) == compare)
+				{
+					toadd = " " + sumbitch;
+				}
+				else
+				{
+					toadd = " " + sumbitch + " ";
+				}
+				myneeds.add(toadd);
+			}
 			
 			List<?> items = (List<?>) page.getByXPath(".//table");
-			
+			for (int i = 2; i < items.size(); i++)
+			{
+				HtmlElement table = (HtmlElement) items.get(i);
+				List<?> rowitems = (List<?>) table.getByXPath(".//tr");
+				for (int j = 1; j < rowitems.size(); j++)
+				{
+					HtmlElement row = (HtmlElement) rowitems.get(j);
+					List<?> nodeitems = (List<?>) row.getByXPath(".//td");
+					HtmlElement node  = (HtmlElement) nodeitems.get(0);
+					String name = node.asText();
+					if (myneeds.contains(name))
+					{
+						HtmlElement tn = (HtmlElement) nodeitems.get(5); String tnumber = tn.asText(); int number = Integer.parseInt(tnumber);
+						double sfqscore = 0.0;
+						boolean exit = false; int k = j+1;
+						while (exit==false)
+						{
+							HtmlElement nextrow = (HtmlElement) rowitems.get(k++);
+							List<?> nextnodeitems = (List<?>) nextrow.getByXPath(".//td");
+							HtmlElement namenode = (HtmlElement) nextnodeitems.get(0);							
+							HtmlElement typenode = (HtmlElement) nextnodeitems.get(1);
+							String type = typenode.asText();
+							if(type.length()==4 || type.length()==5 || type.length()==6)
+							{
+								HtmlElement score = (HtmlElement) nextnodeitems.get(3);
+								String sc = score.asText(); String sfc = sc.substring(0,4);
+								if (sfc.contains("-"))
+								{
+									sfqscore += 0.0;
+									continue;
+								}
+								sfqscore += Double.parseDouble(sfc);
+							}
+							if (namenode.asText().length() > 6)
+								exit = true;
+						}
+						sfqscore /= number;
+						SFQ f = new SFQ();
+						f.setname(name);
+						f.setsfq(sfqscore);
+						result.add(f);
+					}
+				}
+			}	
 			return result;
-		}catch (Exception e) 	{
+		} catch(Exception e)
+		{
 			System.out.println(e);
 			return null;
-		}		
+		}
 	}
+
 	
-	
-	public Vector<SFQ> scrapeinstructorSFQ(String url)	{
+	/**
+	 * @return a hashtable of Instructor SFQ objects with each the name of instructors as key
+	 * @param url the URL of the SFQ website
+	 */
+	public Hashtable<String, Isfq> scrapeinstructorSFQ(String url)	{
 		try	{
 			HtmlPage page = client.getPage(url);
-			Vector<SFQ> result = new Vector<SFQ>();
-		
+			Hashtable<String, Isfq> result = new Hashtable<String, Isfq>();
+			
 			List<?> items = (List<?>) page.getByXPath(".//table"); 
 			for (int i = 2; i < items.size(); i++)
 			{
@@ -154,18 +232,34 @@ public class Scraper {
 						HtmlElement node = (HtmlElement) nodeitems.get(k);
 						String innode = node.asText();
 						String check = ",";
-						if(innode.contains(check))
+						if (result.containsKey(innode))
 						{
 							HtmlElement number = (HtmlElement) nodeitems.get(k+2); double score = 0;
 							String num = number.asText(); String subnum = num.substring(0,4); String boogey = "-";
 							if (subnum.contains(boogey))
 								continue;
 							else
-								{score = Double.parseDouble(subnum);			}				
-							SFQ f = new SFQ();
+								{score = Double.parseDouble(subnum);}
+							Isfq old = result.get(innode);
+							Isfq local = new Isfq();
+							local = old;
+							local.setname(innode);
+							result.remove(innode);
+							local.addsfq(score);
+							result.put(innode, local);
+						}
+						else if (innode.contains(check))
+						{
+							HtmlElement number = (HtmlElement) nodeitems.get(k+2); double score = 0;
+							String num = number.asText(); String subnum = num.substring(0,4); String boogey = "-";
+							if (subnum.contains(boogey))
+								continue;
+							else
+								{score = Double.parseDouble(subnum);}	
+							Isfq f = new Isfq();
 							f.setname(innode);
-							f.setsfq(score);
-							result.add(f);
+							f.addsfq(score);
+							result.put(innode, f);
 						}
 					}
 				}
@@ -175,6 +269,13 @@ public class Scraper {
 		}catch (Exception e) {		System.out.println(e);		return null;		}			
 	}
 	
+	
+	/**
+	 * @return total number of sections
+	 * @param baseurl baseurl
+	 * @param term term
+	 * @param sub subject
+	 */
 	public int sections(String baseurl, String term, String sub) {
 		try {
 			HtmlPage page = client.getPage(baseurl + "/" + term + "/subject/" + sub);
@@ -197,7 +298,13 @@ public class Scraper {
 			return 0;
 		}
 	}
-	
+
+	/**
+	 * @return total number of courses
+	 * @param baseurl baseurl
+	 * @param term term
+	 * @param sub subject
+	 */
 	public int course(String baseurl, String term, String sub) {
 		try {
 			HtmlPage page = client.getPage(baseurl + "/" + term + "/subject/" + sub);
@@ -221,7 +328,12 @@ public class Scraper {
 			return 0;
 		}
 	}
-	
+	/**
+	 * @return list of scraped courses
+	 * @param baseurl baseurl
+	 * @param term term
+	 * @param sub subject
+	 */
 	public List<Course> scrape(String baseurl, String term, String sub) throws Exception {
 
 		try {
@@ -285,3 +397,4 @@ public class Scraper {
 	}
 
 }
+
