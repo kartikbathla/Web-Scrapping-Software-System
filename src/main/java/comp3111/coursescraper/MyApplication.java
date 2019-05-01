@@ -45,6 +45,10 @@ public class MyApplication extends Application {
 	 * 
 	 * This function will be called by the framework shortly after the program started. You are not required to touch any part of this.
 	 */
+    /**
+	 * @param the stage of the show
+	 * @exception any exception that may be thrown
+	 */
 	@Override
 	public void start(Stage stage) throws Exception {
     	FXMLLoader loader = new FXMLLoader();
