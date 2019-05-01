@@ -35,9 +35,10 @@ import javafx.util.Callback;
 import javafx.collections.FXCollections;
 import java.util.Random;
 import java.util.List;
+
 /**
-*  Class to control the JavaFX
-*/
+ * Class to control the JavaFX
+ */
 public class Controller {
 
 	@FXML
@@ -123,7 +124,7 @@ public class Controller {
 
 	@FXML
 	private CheckBox LabTut;
-	
+
 	@FXML
 	private TableView tableView = new TableView();;
 
@@ -132,40 +133,65 @@ public class Controller {
 
 	@FXML
 	private TableColumn courseName = new TableColumn("Course Name");
-	
+
 	@FXML
 	private TableColumn section = new TableColumn("Section");
-	
+
 	@FXML
 	private TableColumn instructorCol = new TableColumn("Instructor");
-	
+
 	@FXML
 	private TableColumn enroll = new TableColumn("Enroll");
-	
 
 	/**
 	 * Function to scrape all subjects in the All Subjects Search tab
 	 */
+	
+	public Vector<String> subjects = new Vector<String>();
+
+    int ALL_SUBJECT_SEARCH ;
 
 	private Scraper scraper = new Scraper();
 
 	@FXML
 	void allSubjectSearch() {
 		buttonSfqEnrollCourse.setDisable(false);
+		int TOTAL_NUMBER_OF_COURSES = 0;
+    	if (scraper.asscnumber==0)
+    	{	
+    	subjects=scraper.scrapeSubjects(textfieldURL.getText(), textfieldTerm.getText());
+    	 ALL_SUBJECT_SEARCH = subjects.size();
+    	System.out.println ("ALL_SUBJECT_SEARCH: "+ALL_SUBJECT_SEARCH);
+    	}
+    	else
+    	{
+    		for (int i =0; i <subjects.size();i++)
+    		{
+    			//System.out.println(subjects);
+    			try {
+					scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),subjects.get(i));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    			System.out.println(subjects.get(i)+ "is done.");
+    			 
+    			progressbar.setStyle("blue");
+    			progressbar.setProgress(i/ALL_SUBJECT_SEARCH );
+    			progressbar.setVisible(true);
+    		}
+    	System.out.println("Total number of courses fetched : "+TOTAL_NUMBER_OF_COURSES);
+    	}
 	}
-	
 
 	/**
 	 * Function to refresh the screen and display the filtered courses each time a
 	 * filter is pressed
 	 * 
-	 * @param nvv
-	 *            the list of filtered courses passed from the filter functions
+	 * @param nvv the list of filtered courses passed from the filter functions
 	 */
 
-	
 	static final List<Section> sectionslistn = new ArrayList<Section>();
-	
 
 	@FXML
 	void display(List<Course> nvv) {
@@ -177,11 +203,11 @@ public class Controller {
 			String newline = c.getTitle() + "\n";
 			for (int i = 0; i < c.getNumSections(); i++) {
 				Section t = c.getSection(i);
-				
+
 				sectionslist.add(t);
 				for (int j = 0; j < t.getnumSlots(); j++) {
 					Slot x = t.getSlot(j);
-					newline += t.getType() + " " + t.getsID() + " : " + x + "\n" ;
+					newline += t.getType() + " " + t.getsID() + " : " + x + "\n";
 					t.setinstructor(x.getInstructor());
 					t.setCodeSec(c.getCode());
 					t.setNameSec(c.getName());
@@ -189,28 +215,25 @@ public class Controller {
 				}
 			}
 			textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
-			
-			
-			}
-		
+
+		}
+
 		textAreaConsole.setText(textAreaConsole.getText() + "Enrolled Sections are : ");
 		for (int i = 0; i < sectionslistn.size(); i++) {
 			String newlinee = sectionslistn.get(i).getCodeSec() + sectionslistn.get(i).getNameSec()
 					+ sectionslistn.get(i).getType();
 
 			textAreaConsole.setText(textAreaConsole.getText() + "\n" + newlinee);
-		}	
-			ObservableList data = FXCollections.observableList(sectionslist);
-			tableView.setItems(data);
-			courseCode.setCellValueFactory(new PropertyValueFactory<>("codeSec"));
-			section.setCellValueFactory(new PropertyValueFactory<>("type"));
-			courseName.setCellValueFactory(new PropertyValueFactory<>("nameSec"));
-			instructorCol.setCellValueFactory(new PropertyValueFactory<>("instructor"));
-			enroll.setCellValueFactory(new PropertyValueFactory<>("enrolling"));
-			tableView.setItems(data);
-			tableView.getColumns().setAll(courseCode, section, courseName, instructorCol, enroll);
-
-		
+		}
+		ObservableList data = FXCollections.observableList(sectionslist);
+		tableView.setItems(data);
+		courseCode.setCellValueFactory(new PropertyValueFactory<>("codeSec"));
+		section.setCellValueFactory(new PropertyValueFactory<>("type"));
+		courseName.setCellValueFactory(new PropertyValueFactory<>("nameSec"));
+		instructorCol.setCellValueFactory(new PropertyValueFactory<>("instructor"));
+		enroll.setCellValueFactory(new PropertyValueFactory<>("enrolling"));
+		tableView.setItems(data);
+		tableView.getColumns().setAll(courseCode, section, courseName, instructorCol, enroll);
 
 		for (Section y : sectionslist) {
 			y.enrolling.selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -221,11 +244,12 @@ public class Controller {
 						y.setEnrollment(true);
 						sectionslistn.add(y);
 						refresh(nvv, sectionslistn);
+						update_timetable(sectionslistn, new_val, y);
 					} else {
 						y.setEnrollment(false);
 						sectionslistn.remove(y);
 						refresh(nvv, sectionslistn);
-
+						update_timetable(sectionslistn, new_val, y);
 					}
 				}
 
@@ -233,23 +257,23 @@ public class Controller {
 
 		}
 	}
-	
+
 	/**
 	 * Function to refresh the screen and display the filtered courses each time an
 	 * enrollment box is changed
 	 * 
-	 * @param nvv
-	 *            the list of filtered courses passed from the filter functions
-	 * @param sectionlist
-	 *            the static list of sections the student is enrolled into passed
-	 *            when an enrollment box is changed from the listener function
+	 * @param nvv         the list of filtered courses passed from the filter
+	 *                    functions
+	 * @param sectionlist the static list of sections the student is enrolled into
+	 *                    passed when an enrollment box is changed from the listener
+	 *                    function
 	 */
 	@FXML
 
-	void refresh(List<Course> nvv, List<Section>sectionlist) {
+	void refresh(List<Course> nvv, List<Section> sectionlist) {
 		try {
 			if (nvv.isEmpty()) {
-			textAreaConsole.setText("");
+				textAreaConsole.setText("");
 				for (int i = 0; i < sectionlist.size(); i++) {
 					String newline = sectionlist.get(i).getCodeSec() + sectionlist.get(i).getNameSec()
 							+ sectionlist.get(i).getType();
@@ -265,10 +289,10 @@ public class Controller {
 
 					for (int j = 0; j < t.getnumSlots(); j++) {
 						Slot x = t.getSlot(j);
-						newlinee += t.getType() + " " + t.getsID() + " : " + x + "\n" ;
+						newlinee += t.getType() + " " + t.getsID() + " : " + x + "\n";
 					}
 				}
-				textAreaConsole.setText(textAreaConsole.getText() + "\n" + newlinee );
+				textAreaConsole.setText(textAreaConsole.getText() + "\n" + newlinee);
 			}
 
 			textAreaConsole.setText(textAreaConsole.getText() + "Enrolled Sections are : ");
@@ -286,14 +310,14 @@ public class Controller {
 			textAreaConsole.setText(error);
 		}
 	}
+
 	/**
 	 * for the button Select All in the filter tab when the button is pressed , all
 	 * checkboxes are turned true and their respective functions are called and the
 	 * text is changed to de-select all when the button is pressed again, previous
 	 * conditions are restored
 	 * 
-	 * @param nvv
-	 *            the list of filtered courses passed from the filter functions
+	 * @param nvv the list of filtered courses passed from the filter functions
 	 */
 	@FXML
 	void selectAll() {
@@ -341,6 +365,7 @@ public class Controller {
 		}
 
 	}
+
 	/**
 	 * Filter function for the checkbox AM There are multiple flags that keep count
 	 * of the conditions where other checkboxes are ticked or not There are two
@@ -350,9 +375,8 @@ public class Controller {
 	 * satisfies the condition- and if it satisfies, it is added the course list
 	 * "nvv" they are then displayed using the display() function
 	 * 
-	 * @exception throws
-	 *                exception e which is a cutom made exception to display error
-	 *                404 when there is an issue with the scraper
+	 * @exception throws exception e which is a cutom made exception to display
+	 *                   error 404 when there is an issue with the scraper
 	 */
 	@FXML
 	void AMT() {
@@ -603,7 +627,7 @@ public class Controller {
 					}
 					if ((exchange == 0) && (cchange == 0) && (daychange == 0) && (labchange == 0) && time == 0) {
 						nvv.removeAll(nvv);
-						
+
 					}
 
 				}
@@ -615,6 +639,7 @@ public class Controller {
 			textAreaConsole.setText(error);
 		}
 	}
+
 	/**
 	 * Filter function for the checkbox PM There are multiple flags that keep count
 	 * of the conditions where other checkboxes are ticked or not There are two
@@ -883,6 +908,7 @@ public class Controller {
 		}
 
 	}
+
 	/**
 	 * Filter function for the checkbox Monday There are multiple flags that keep
 	 * count of the conditions where other checkboxes are ticked or not There are
@@ -1178,6 +1204,7 @@ public class Controller {
 			textAreaConsole.setText(error);
 		}
 	}
+
 	/**
 	 * Filter function for the checkbox Tuesday There are multiple flags that keep
 	 * count of the conditions where other checkboxes are ticked or not There are
@@ -1475,6 +1502,7 @@ public class Controller {
 			textAreaConsole.setText(error);
 		}
 	}
+
 	/**
 	 * Filter function for the checkbox Wednesday There are multiple flags that keep
 	 * count of the conditions where other checkboxes are ticked or not There are
@@ -1771,6 +1799,7 @@ public class Controller {
 		}
 
 	}
+
 	/**
 	 * Filter function for the checkbox Thursday There are multiple flags that keep
 	 * count of the conditions where other checkboxes are ticked or not There are
@@ -2065,6 +2094,7 @@ public class Controller {
 			textAreaConsole.setText(error);
 		}
 	}
+
 	/**
 	 * Filter function for the checkbox Friday There are multiple flags that keep
 	 * count of the conditions where other checkboxes are ticked or not There are
@@ -2359,6 +2389,7 @@ public class Controller {
 			textAreaConsole.setText(error);
 		}
 	}
+
 	/**
 	 * Filter function for the checkbox Saturday There are multiple flags that keep
 	 * count of the conditions where other checkboxes are ticked or not There are
@@ -2654,6 +2685,7 @@ public class Controller {
 			textAreaConsole.setText(error);
 		}
 	}
+
 	/**
 	 * Filter function for the checkbox NoEx (no exclusion) There are multiple flags
 	 * that keep count of the conditions where other checkboxes are ticked or not
@@ -2949,6 +2981,7 @@ public class Controller {
 			textAreaConsole.setText(error);
 		}
 	}
+
 	/**
 	 * Filter function for the checkbox Common Core There are multiple flags that
 	 * keep count of the conditions where other checkboxes are ticked or not There
@@ -3243,6 +3276,7 @@ public class Controller {
 			textAreaConsole.setText(error);
 		}
 	}
+
 	/**
 	 * Filter function for the checkbox LabTut (including lab and tutorial) There
 	 * are multiple flags that keep count of the conditions where other checkboxes
@@ -3539,140 +3573,271 @@ public class Controller {
 			textAreaConsole.setText(error);
 		}
 	}
+
 	/**
-	* initializes the setSfqenrollcourse button to disabled
-	*/
-	public void initialize()
-	    {
-	    	buttonSfqEnrollCourse.setDisable(true);
-	    }
+	 * initializes the setSfqenrollcourse button to disabled
+	 */
+	public void initialize() {
+		buttonSfqEnrollCourse.setDisable(true);
+	}
+
 	/**
-	* calls the search function when clicked on the search button on the main tab
-	* @exception throws exception e which is a custom made
-	* exception to display error 404 when there is an issue with the scraper
-	*/
+	 * calls the search function when clicked on the search button on the main tab
+	 * 
+	 * @exception throws exception e which is a custom made exception to display
+	 *                   error 404 when there is an issue with the scraper
+	 */
 	@FXML
-    void search() {
-    	buttonSfqEnrollCourse.setDisable(false);
-    	try {
-    	textAreaConsole.setText(" ");
-    	List<Course> v = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());
-    	for (Course c : v) {
-    		String newline = c.getTitle() + "\n";
-    		for (int i = 0; i < c.getNumSections(); i++)
-    		{
-    			Section t = c.getSection(i);
-    			for (int j = 0; j < t.getnumSlots(); j++)
-    			{
-    				Slot x = t.getSlot(j);
-    				newline += t.getType() + " " + t.getsID() + " : " + x + "\n";
-    			}
-    		}
-    		textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
-    	}
-    	
-    	int totalsections = scraper.sections(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());
+	void search() {
+		buttonSfqEnrollCourse.setDisable(false);
+		try {
+			textAreaConsole.setText(" ");
+			List<Course> v = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),
+					textfieldSubject.getText());
+			for (Course c : v) {
+				String newline = c.getTitle() + "\n";
+				for (int i = 0; i < c.getNumSections(); i++) {
+					Section t = c.getSection(i);
+					for (int j = 0; j < t.getnumSlots(); j++) {
+						Slot x = t.getSlot(j);
+						newline += t.getType() + " " + t.getsID() + " : " + x + "\n";
+					}
+				}
+				textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+			}
 
-    	textAreaConsole.setText(textAreaConsole.getText() + "\n" + "TOTAL NUMBER OF DIFFERENT SECTIONS: " + totalsections );
-    	
-    	int totalvalidcourses = scraper.course(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());;
+			int totalsections = scraper.sections(textfieldURL.getText(), textfieldTerm.getText(),
+					textfieldSubject.getText());
 
-    	textAreaConsole.setText(textAreaConsole.getText() + "\n" + "TOTAL NUMBER OF COURSES: " + totalvalidcourses);
-    	
-    	Vector<String> instructors = new Vector<String>(); Vector<String> reject = new Vector<String>();
-    	String timeb = "03:10PM";
-		LocalTime boogey = LocalTime.parse(timeb, DateTimeFormatter.ofPattern("hh:mma", Locale.US));
-    	for (Course c : v)
-    	{
-    		for (int i = 0; i<c.getNumSections(); i++)
-    		{
-    			Section x = c.getSection(i);
-    			for (int j = 0; j<x.getnumSlots(); j++)
-    			{
-    				Slot y = x.getSlot(j);
-    				if (y.getStart().isBefore(boogey) && y.getEnd().isAfter(boogey) && y.getDay() == 1)
-    				{
-    					List<String> boo = y.getInstructor();
-    					for (String s:boo)
-    					{
-    						s.replace("\n", "");
-    						reject.add(s);
-    					}
-    						
-    				}
-    			}
-    			for (int j = 0; j<x.getnumSlots(); j++)
-    			{	
-    				Slot y = x.getSlot(j);
-    				List<String> name = y.getInstructor(); 
-    				for (String s:name)
-    				{
-    					if (!instructors.contains(s) && !s.equals("TBA"))
-        				{
-        					instructors.add(s);
-        				}	
-    				}
-    			}	
-    		}
-    	}
-    	Vector<String> finallist = new Vector<String>();
-    	for (int i = 0; i<instructors.size(); i++)
-    	{
-    		String temp = instructors.get(i);
-    		if (reject.contains(temp))
-    			continue;
-    		finallist.add(temp);
-    	}
-    	
-    	
-    	Collections.sort(finallist); 
-    	String line = "";
-    	for (int i = 0; i<finallist.size(); i++)
-    	{
-    		line += i+1 + " " + finallist.get(i) + " " + " " + "\n";
-    	}
-    	textAreaConsole.setText(textAreaConsole.getText() + "\n" + "INSTRUCTORS WHO DO NOT HAVE A TEACHING ASSIGNMENT AT 3:10PM ON TUESDAY " + "\n" + line);
+			textAreaConsole
+					.setText(textAreaConsole.getText() + "\n" + "TOTAL NUMBER OF DIFFERENT SECTIONS: " + totalsections);
 
-    	} catch(Exception e)	{
-    		String error = "Error 404: Page not Found. The Requested URL was not found.";
-    		textAreaConsole.setText(error);
-    	}
-    	
-    	
-    }
+			int totalvalidcourses = scraper.course(textfieldURL.getText(), textfieldTerm.getText(),
+					textfieldSubject.getText());
+			;
+
+			textAreaConsole.setText(textAreaConsole.getText() + "\n" + "TOTAL NUMBER OF COURSES: " + totalvalidcourses);
+
+			Vector<String> instructors = new Vector<String>();
+			Vector<String> reject = new Vector<String>();
+			String timeb = "03:10PM";
+			LocalTime boogey = LocalTime.parse(timeb, DateTimeFormatter.ofPattern("hh:mma", Locale.US));
+			for (Course c : v) {
+				for (int i = 0; i < c.getNumSections(); i++) {
+					Section x = c.getSection(i);
+					for (int j = 0; j < x.getnumSlots(); j++) {
+						Slot y = x.getSlot(j);
+						if (y.getStart().isBefore(boogey) && y.getEnd().isAfter(boogey) && y.getDay() == 1) {
+							List<String> boo = y.getInstructor();
+							for (String s : boo) {
+								s.replace("\n", "");
+								reject.add(s);
+							}
+
+						}
+					}
+					for (int j = 0; j < x.getnumSlots(); j++) {
+						Slot y = x.getSlot(j);
+						List<String> name = y.getInstructor();
+						for (String s : name) {
+							if (!instructors.contains(s) && !s.equals("TBA")) {
+								instructors.add(s);
+							}
+						}
+					}
+				}
+			}
+			Vector<String> finallist = new Vector<String>();
+			for (int i = 0; i < instructors.size(); i++) {
+				String temp = instructors.get(i);
+				if (reject.contains(temp))
+					continue;
+				finallist.add(temp);
+			}
+
+			Collections.sort(finallist);
+			String line = "";
+			for (int i = 0; i < finallist.size(); i++) {
+				line += i + 1 + " " + finallist.get(i) + " " + " " + "\n";
+			}
+			textAreaConsole.setText(textAreaConsole.getText() + "\n"
+					+ "INSTRUCTORS WHO DO NOT HAVE A TEACHING ASSIGNMENT AT 3:10PM ON TUESDAY " + "\n" + line);
+
+		} catch (Exception e) {
+			String error = "Error 404: Page not Found. The Requested URL was not found.";
+			textAreaConsole.setText(error);
+		}
+
+	}
+
 	/**
-	*  returns the instructors SFQ when clicked on the button on the SFQ tab
-	*  @exception throws exception e which is a custom made
-	* exception to display error 404 when there is an issue with the scraper
-	*/
+	 * returns the instructors SFQ when clicked on the button on the SFQ tab
+	 * 
+	 * @exception throws exception e which is a custom made exception to display
+	 *                   error 404 when there is an issue with the scraper
+	 */
 	@FXML
-    void findInstructorSfq() {
-    	Hashtable<String, Isfq> v = scraper.scrapeinstructorSFQ(textfieldSfqUrl.getText());
-    	String disp = "";
-    	Set<String> myset = v.keySet();
-    	for (String key:myset)
-    	{
-    		disp += key + " " + v.get(key).finalsfq() + "\n";
-    	}
-    	textAreaConsole.setText(disp);
-    }
-	
-	
+	void findInstructorSfq() {
+		Hashtable<String, Isfq> v = scraper.scrapeinstructorSFQ(textfieldSfqUrl.getText());
+		String disp = "";
+		Set<String> myset = v.keySet();
+		for (String key : myset) {
+			disp += key + " " + v.get(key).finalsfq() + "\n";
+		}
+		textAreaConsole.setText(disp);
+	}
+
 	/**
-	* returns the SFQ of the enrolled courses when clicked on the button on the SFQ tab
-	* @exception throws exception e which is a cutom made
-	* exception to display error 404 when there is an issue with the scraper
-	*/
+	 * returns the SFQ of the enrolled courses when clicked on the button on the SFQ
+	 * tab
+	 * 
+	 * @exception throws exception e which is a cutom made exception to display
+	 *                   error 404 when there is an issue with the scraper
+	 */
 	@FXML
 	void findSfqEnrollCourse() {
-		  Vector<SFQ> v = scraper.scrapecourseSFQ(textfieldSfqUrl.getText());
-		  String disp = "";
-		  for (int i = 0; i < v.size(); i++)
-	    	{
-	    		SFQ c = v.get(i);
-	    		disp += c.getname() + " " + c.getsfq() + "\n";
-	       	}
-		  textAreaConsole.setText(disp);
-	    }
-	
+		Vector<SFQ> v = scraper.scrapecourseSFQ(textfieldSfqUrl.getText());
+		String disp = "";
+		for (int i = 0; i < v.size(); i++) {
+			SFQ c = v.get(i);
+			disp += c.getname() + " " + c.getsfq() + "\n";
+		}
+		textAreaConsole.setText(disp);
+	}
+
+	Hashtable<Slot, Label> sitt = new Hashtable<Slot, Label>();
+	/**
+	 * updates the time table on each update of the enrollment
+	 * 
+	 * 
+	 */
+	void update_timetable(List<Section> sectionslistn, boolean addorremove, Section s) {
+
+		AnchorPane ap = (AnchorPane) tabTimetable.getContent();
+
+		List<Color> colours = new ArrayList<Color>();
+
+		final Color[] KELLY_COLORS = {
+
+				Color.web("0xFFB300"), // Vivid Yellow
+
+				Color.web("0x803E75"), // Strong Purple
+
+				Color.web("0xFF6800"), // Vivid Orange
+
+				Color.web("0xA6BDD7"), // Very Light Blue
+
+				Color.web("0xC10020"), // Vivid Red
+
+				Color.web("0xCEA262"), // Grayish Yellow
+
+				Color.web("0x817066"), // Medium Gray
+
+				Color.web("0x007D34"), // Vivid Green
+
+				Color.web("0xF6768E"), // Strong Purplish Pink
+
+				Color.web("0x00538A"), // Strong Blue
+
+				Color.web("0xFF7A5C"), // Strong Yellowish Pink
+
+				Color.web("0x53377A"), // Strong Violet
+
+				Color.web("0xFF8E00"), // Vivid Orange Yellow
+
+				Color.web("0xB32851"), // Strong Purplish Red
+
+				Color.web("0xF4C800"), // Vivid Greenish Yellow
+
+				Color.web("0x7F180D"), // Strong Reddish Brown
+
+				Color.web("0x93AA00"), // Vivid Yellowish Green
+
+				Color.web("0x593315"), // Deep Yellowish Brown
+
+				Color.web("0xF13A13"), // Vivid Reddish Orange
+
+				Color.web("0x232C16"), // Dark Olive Green
+
+		};
+
+		if (addorremove) {
+
+			for (int i = 0; i < sectionslistn.size(); i++)
+
+			{
+
+				for (int j = 0; j < sectionslistn.get(i).getnumSlots(); j++)
+
+				{
+
+					if (!sitt.containsKey(sectionslistn.get(i).getSlot(j)))
+
+					{
+
+						Label ltba = new Label(
+								sectionslistn.get(i).getCodeSec() + "\n" + sectionslistn.get(i).getType());
+
+						sitt.put(sectionslistn.get(i).getSlot(j), ltba);
+
+						ltba.setOpacity(0.5);
+
+						ltba.setBackground(
+								new Background(new BackgroundFill(KELLY_COLORS[i], CornerRadii.EMPTY, Insets.EMPTY)));
+
+						ltba.setLayoutX((sectionslistn.get(i).getSlot(j).getDay() + 1) * 100);
+
+						ltba.setLayoutY(35 + ((sectionslistn.get(i).getSlot(j).getStartHour() - 9) * 30)
+								+ (sectionslistn.get(i).getSlot(j).getStartMinute() * 0.5));
+
+						ltba.setMinWidth(100.0);
+
+						ltba.setMaxWidth(100.0);
+
+						ltba.setMinHeight((sectionslistn.get(i).getSlot(i).getEnd()
+								.minusHours(sectionslistn.get(i).getSlot(j).getStart().getHour())
+								.minusMinutes(sectionslistn.get(i).getSlot(j).getStart().getMinute()).getHour() * 30)
+								+ ((sectionslistn.get(i).getSlot(i).getEnd()
+										.minusHours(sectionslistn.get(i).getSlot(j).getStart().getHour())
+										.minusMinutes(sectionslistn.get(i).getSlot(j).getStart().getMinute()))
+												.getMinute()
+										* 0.5));
+
+						ltba.setMaxHeight((sectionslistn.get(i).getSlot(i).getEnd()
+								.minusHours(sectionslistn.get(i).getSlot(j).getStart().getHour())
+								.minusMinutes(sectionslistn.get(i).getSlot(j).getStart().getMinute()).getHour() * 30)
+								+ ((sectionslistn.get(i).getSlot(i).getEnd()
+										.minusHours(sectionslistn.get(i).getSlot(j).getStart().getHour())
+										.minusMinutes(sectionslistn.get(i).getSlot(j).getStart().getMinute()))
+												.getMinute()
+										* 0.5));
+
+						ap.getChildren().addAll(ltba);
+
+					}
+
+				}
+
+			}
+
+		}
+
+		if (!addorremove)
+
+		{
+
+			for (int i = 0; i < s.getnumSlots(); i++)
+
+			{
+
+				ap.getChildren().remove(sitt.get(s.getSlot(i)));
+
+				sitt.remove(s.getSlot(i));
+
+			}
+
+		}
+
+	}
+
 }

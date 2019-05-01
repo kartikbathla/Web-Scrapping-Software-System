@@ -396,5 +396,31 @@ public class Scraper {
 		return null;
 	}
 
+	public static int asscnumber = 0;
+	/**
+	 * @return list of all scraped courses
+	 * @param baseurl baseurl
+	 * @param term term
+	 */
+	public Vector<String> scrapeSubjects(String baseurl, String term)
+	{	asscnumber++;
+		try 
+		{
+			HtmlPage page = client.getPage(baseurl + '/' + term +'/');
+			
+			List<?> items = (List<?>) page.getByXPath("//div[@class='depts']/a");
+			Vector<String> subjects = new Vector<String>();
+			 for(int i = 0 ; i< items.size();i++)
+			 {
+					HtmlElement htmlItem = (HtmlElement) items.get(i);	
+					subjects.add(htmlItem.asText());
+			 }
+			 return subjects ; 
+		} catch(Exception e)
+		{
+			System.out.print(e);
+		}
+	return null;
+	}	
 }
 
