@@ -99,6 +99,7 @@ public class Section{
 		slots[numSlots++] = s;
 	}
 	/**
+	 * @param i the slot number
 	 *@return the indicated slot
 	 */
 	public Slot getSlot(int i)	{
@@ -137,7 +138,7 @@ public class Section{
 		return sID;
 	}
 	/**
-	 *@param sets the section ID
+	 *@param ID sets the section ID
 	 */
 	public void setsID(String ID)	{
 		this.sID = ID;

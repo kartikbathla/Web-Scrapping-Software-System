@@ -118,7 +118,7 @@ public class Slot {
 		this.day = day;
 	}
 	/**
-	 * @param the list of instructors
+	 * @param s the list of instructors
 	 */
 	public void setInstructor(List<String> s)	{
 		this.instructor = s;

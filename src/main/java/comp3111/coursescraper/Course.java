@@ -29,7 +29,7 @@ public class Course {
 		name = null;
 	}
 	/**
-	 * @param Section s add the section for each course 
+	 * @param s add the section for each course 
 	 */
 	public void addSection(Section s) {
 		if (numSections >= DEFAULT_MAX_SECTIONS)
@@ -37,7 +37,7 @@ public class Course {
 		sections[numSections++] = s;
 	}
 	/**
-	 * @param index i of the section in list of sections 
+	 * @param i of the section in list of sections 
 	 * @return the the section by the index i  
 	 */
 	public Section getSection(int i) {

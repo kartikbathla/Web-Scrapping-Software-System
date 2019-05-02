@@ -17,6 +17,7 @@ public class Isfq {
 	}
 	/**
 	 * copy constructor
+	 * @param s copy constructor
 	 */
 	public Isfq(Isfq s)
 	{

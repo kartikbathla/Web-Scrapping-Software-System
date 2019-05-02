@@ -133,7 +133,7 @@ public class Scraper {
 	}
 	/**
 	 * @return a vector of SFQ objects
-	 * @param the URL of the SFQ website
+	 * @param url the URL of the SFQ website
 	 */
 	public Vector<SFQ> scrapecourseSFQ(String url)
 	{
@@ -333,6 +333,7 @@ public class Scraper {
 	 * @param baseurl baseurl
 	 * @param term term
 	 * @param sub subject
+	 * @throws Exception e exception that may be generated
 	 */
 	public List<Course> scrape(String baseurl, String term, String sub) throws Exception {
 

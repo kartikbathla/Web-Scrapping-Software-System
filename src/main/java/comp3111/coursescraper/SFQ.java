@@ -16,6 +16,7 @@ public class SFQ {
 	}
 	/**
 	 * Copy constructor
+	 * @param s copy constructor object
 	 */
 	public SFQ(SFQ s) {
 		this.sfq = s.sfq;

@@ -61,7 +61,15 @@ public class ItemTest {
 		Course s = new Course();
 		s.setCommonCore(true);
 		assertEquals(s.getCommonCore(), true);
+		
 	}
+	@Test
+	public void testu()	{
+		Course s = new Course();
+		s.setNumSlots(1);
+		assertEquals(s.getNumSections(), 1);
+	}
+	
 
 //	@Test
 //	public void testAdd()	{

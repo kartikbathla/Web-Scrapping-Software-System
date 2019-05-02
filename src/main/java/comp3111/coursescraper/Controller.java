@@ -1,45 +1,46 @@
 package comp3111.coursescraper;
 
-import java.util.*;
-import java.util.function.Supplier;
-
-import java.awt.*;
-import java.awt.event.*;
+import java.net.URL;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.Vector;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TextField;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.CheckBox;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
-import javafx.event.EventHandler;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.util.Callback;
-import javafx.collections.FXCollections;
-import java.util.Random;
-import java.util.List;
 
 /**
  * Class to control the JavaFX
  */
-public class Controller {
+public class Controller implements Initializable{
 
 	@FXML
 	private Tab tabMain;
@@ -143,6 +144,13 @@ public class Controller {
 	@FXML
 	private TableColumn enroll = new TableColumn("Enroll");
 
+	@Override
+	public void initialize(URL arg0, ResourceBundle arg1) {
+		// TODO Auto-generated method stub
+		buttonSfqEnrollCourse.setDisable(true);
+	}
+	
+	
 	/**
 	 * Function to scrape all subjects in the All Subjects Search tab
 	 */
@@ -152,11 +160,11 @@ public class Controller {
     int ALL_SUBJECT_SEARCH ;
 
 	private Scraper scraper = new Scraper();
-
+	 int tnoc = 0;
 	@FXML
 	void allSubjectSearch() {
 		buttonSfqEnrollCourse.setDisable(false);
-		int TOTAL_NUMBER_OF_COURSES = 0;
+		
     	if (scraper.asscnumber==0)
     	{	
     	subjects=scraper.scrapeSubjects(textfieldURL.getText(), textfieldTerm.getText());
@@ -165,23 +173,40 @@ public class Controller {
     	}
     	else
     	{
-    		for (int i =0; i <subjects.size();i++)
-    		{
-    			//System.out.println(subjects);
-    			try {
-					scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),subjects.get(i));
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+    		
+    		Task task = new Task() {
+
+				@Override
+				protected Object call() throws Exception {
+					for (int i =0; i <subjects.size();i++)
+		    		{
+		    			//System.out.println(subjects);
+		    			
+							scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),subjects.get(i));
+							tnoc+=(scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),subjects.get(i)).size());
+		    			
+		    			System.out.println(subjects.get(i)+ " is done.");
+		    			 updateProgress(i,subjects.size());
+		    			 Thread.sleep(10);
+		    		}
+					textAreaConsole.setText("Total number of courses fetched : "+tnoc);
+					return null;
 				}
-    			System.out.println(subjects.get(i)+ "is done.");
-    			 
-    			progressbar.setStyle("blue");
-    			progressbar.setProgress(i/ALL_SUBJECT_SEARCH );
-    			progressbar.setVisible(true);
-    		}
-    	System.out.println("Total number of courses fetched : "+TOTAL_NUMBER_OF_COURSES);
+    			
+    			
+    		};
+    		
+    		progressbar.progressProperty().unbind();
+    		progressbar.progressProperty().bind(task.progressProperty());
+    		
+    		Thread th= new Thread(task);
+    		th.setDaemon(true);
+    		th.start();
+    		
+    		
+    		
     	}
+    	
 	}
 
 	/**
@@ -191,7 +216,7 @@ public class Controller {
 	 * @param nvv the list of filtered courses passed from the filter functions
 	 */
 
-	static final List<Section> sectionslistn = new ArrayList<Section>();
+	static List<Section> sectionslistn = new ArrayList<Section>();
 
 	@FXML
 	void display(List<Course> nvv) {
@@ -244,12 +269,12 @@ public class Controller {
 						y.setEnrollment(true);
 						sectionslistn.add(y);
 						refresh(nvv, sectionslistn);
-						update_timetable(sectionslistn, new_val, y);
+						update_timetable(sectionslistn, true, y);
 					} else {
 						y.setEnrollment(false);
 						sectionslistn.remove(y);
 						refresh(nvv, sectionslistn);
-						update_timetable(sectionslistn, new_val, y);
+						update_timetable(sectionslistn, false, y);
 					}
 				}
 
@@ -3577,9 +3602,9 @@ public class Controller {
 	/**
 	 * initializes the setSfqenrollcourse button to disabled
 	 */
-	public void initialize() {
-		buttonSfqEnrollCourse.setDisable(true);
-	}
+//	public void initialize() {
+//		
+//	}
 
 	/**
 	 * calls the search function when clicked on the search button on the main tab
@@ -3715,8 +3740,6 @@ public class Controller {
 
 		AnchorPane ap = (AnchorPane) tabTimetable.getContent();
 
-		List<Color> colours = new ArrayList<Color>();
-
 		final Color[] KELLY_COLORS = {
 
 				Color.web("0xFFB300"), // Vivid Yellow
@@ -3763,52 +3786,49 @@ public class Controller {
 
 		if (addorremove) {
 
-			for (int i = 0; i < sectionslistn.size(); i++)
 
-			{
-
-				for (int j = 0; j < sectionslistn.get(i).getnumSlots(); j++)
+				for (int j = 0; j < s.getnumSlots(); j++)
 
 				{
 
-					if (!sitt.containsKey(sectionslistn.get(i).getSlot(j)))
+					if (!sitt.containsKey(s.getSlot(j)))
 
 					{
 
 						Label ltba = new Label(
-								sectionslistn.get(i).getCodeSec() + "\n" + sectionslistn.get(i).getType());
+								s.getCodeSec() + "\n" + s.getType());
 
-						sitt.put(sectionslistn.get(i).getSlot(j), ltba);
+					sitt.put(s.getSlot(j), ltba);
 
 						ltba.setOpacity(0.5);
 
 						ltba.setBackground(
-								new Background(new BackgroundFill(KELLY_COLORS[i], CornerRadii.EMPTY, Insets.EMPTY)));
+								new Background(new BackgroundFill(KELLY_COLORS[sectionslistn.size()-1], CornerRadii.EMPTY, Insets.EMPTY)));
 
-						ltba.setLayoutX((sectionslistn.get(i).getSlot(j).getDay() + 1) * 100);
+						ltba.setLayoutX((s.getSlot(j).getDay() + 1) * 100);
 
-						ltba.setLayoutY(35 + ((sectionslistn.get(i).getSlot(j).getStartHour() - 9) * 30)
-								+ (sectionslistn.get(i).getSlot(j).getStartMinute() * 0.5));
+						ltba.setLayoutY(35 + ((s.getSlot(j).getStartHour() - 9) * 30)
+								+ (s.getSlot(j).getStartMinute() * 0.5));
 
 						ltba.setMinWidth(100.0);
 
 						ltba.setMaxWidth(100.0);
 
-						ltba.setMinHeight((sectionslistn.get(i).getSlot(i).getEnd()
-								.minusHours(sectionslistn.get(i).getSlot(j).getStart().getHour())
-								.minusMinutes(sectionslistn.get(i).getSlot(j).getStart().getMinute()).getHour() * 30)
-								+ ((sectionslistn.get(i).getSlot(i).getEnd()
-										.minusHours(sectionslistn.get(i).getSlot(j).getStart().getHour())
-										.minusMinutes(sectionslistn.get(i).getSlot(j).getStart().getMinute()))
+						ltba.setMinHeight((s.getSlot(j).getEnd()
+								.minusHours(s.getSlot(j).getStart().getHour())
+								.minusMinutes(s.getSlot(j).getStart().getMinute()).getHour() * 30)
+								+ ((s.getSlot(j).getEnd()
+										.minusHours(s.getSlot(j).getStart().getHour())
+										.minusMinutes(s.getSlot(j).getStart().getMinute()))
 												.getMinute()
 										* 0.5));
 
-						ltba.setMaxHeight((sectionslistn.get(i).getSlot(i).getEnd()
-								.minusHours(sectionslistn.get(i).getSlot(j).getStart().getHour())
-								.minusMinutes(sectionslistn.get(i).getSlot(j).getStart().getMinute()).getHour() * 30)
-								+ ((sectionslistn.get(i).getSlot(i).getEnd()
-										.minusHours(sectionslistn.get(i).getSlot(j).getStart().getHour())
-										.minusMinutes(sectionslistn.get(i).getSlot(j).getStart().getMinute()))
+						ltba.setMaxHeight((s.getSlot(j).getEnd()
+								.minusHours(s.getSlot(j).getStart().getHour())
+								.minusMinutes(s.getSlot(j).getStart().getMinute()).getHour() * 30)
+								+ ((s.getSlot(j).getEnd()
+										.minusHours(s.getSlot(j).getStart().getHour())
+										.minusMinutes(s.getSlot(j).getStart().getMinute()))
 												.getMinute()
 										* 0.5));
 
@@ -3820,9 +3840,9 @@ public class Controller {
 
 			}
 
-		}
+		
 
-		if (!addorremove)
+		else
 
 		{
 
@@ -3832,12 +3852,14 @@ public class Controller {
 
 				ap.getChildren().remove(sitt.get(s.getSlot(i)));
 
-				sitt.remove(s.getSlot(i));
+			sitt.remove(s.getSlot(i));
 
 			}
 
 		}
 
 	}
+
+	
 
 }
